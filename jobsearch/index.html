@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIIT Job Portal</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4A90E2;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        header p {
+            margin: 5px 0 0 0;
+            font-size: 1.1em;
+        }
+
+        .logo img {
+            width: 125px;
+            height: 155px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-section label {
+            font-size: 1.1em;
+            margin-right: 10px;
+            color: #333;
+        }
+
+        .search-section input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 250px;
+            margin-right: 10px;
+        }
+
+        .search-section button {
+            padding: 10px 20px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-section button:hover {
+            background-color: #357ABD;
+        }
+
+        .job-results {
+            text-align: center;
+        }
+
+        .job-results h2 {
+            font-size: 1.8em;
+            color: #4A90E2;
+            margin-bottom: 20px;
+        }
+
+        #jobList {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        #jobList li {
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #jobList li strong {
+            font-size: 1.3em;
+            color: #333;
+        }
+
+        #jobList li em {
+            font-size: 1em;
+            color: #555;
+        }
+
+        #jobList li span {
+            display: block;
+            margin-top: 5px;
+            color: #777;
+        }
+
+        #jobList li a {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 1em;
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #jobList li a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            background-color: #4A90E2;
+            color: white;
+            padding: 15px 0;
+            margin-top: 20px;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1em;
+        }
+
+        .loading {
+            color: #4A90E2;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>JIIT Job Portal</h1>
+            <p>Your Gateway to Career Opportunities</p>
+        </div>
+        <div class="logo">
+            <img src="static/logo.png" >
+        </div>
+    </header>
+    <div class="container">
+        <div class="search-section">
+            <label for="techStack">Enter Tech Stack (e.g., Python, JavaScript, React):</label>
+            <input type="text" id="techStack" name="techStack" placeholder="Type your skills here">
+            <div style="margin:15px"> </div>
+            <label for="location">Enter Location:</label>
+            <input type="text" id="location" name="location" placeholder="e.g., New York, Remote">
+            <div style="margin:15px"></div>
+            <button onclick="fetchJobs()">Search Jobs</button>
+        </div>
+    </div>
+
+    <div class="job-results">
+        <h2>Job Listings</h2>
+        <ul id="jobList"></ul>
+        <div id="loadingMessage" class="loading" style="display:none;">Loading jobs...</div>
+    </div>
+
+    <footer>
+        <p>&copy; JIIT Job Portal. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function fetchJobs() {
+            const techStack = document.getElementById('techStack').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const jobList = document.getElementById('jobList');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            jobList.innerHTML = ''; 
+            loadingMessage.style.display = 'block'; 
+
+            if (!techStack || !location) {
+                alert("Please enter both a tech stack and a location.");
+                loadingMessage.style.display = 'none'; 
+                return;
+            }
+
+            fetch(`http://localhost:5001/jobs?tech_stack=${techStack}&location=${location}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingMessage.style.display = 'none'; 
+
+                    if (data && data.jobs && Array.isArray(data.jobs) && data.jobs.length > 0) {
+                       
+                        data.jobs.forEach(job => {
+                            const listItem = document.createElement('li');
+                            listItem.innerHTML = `
+                                <strong>${job.title}</strong><br>
+                                <em>${job.company}</em><br>
+                                <span>${job.location}</span><br>
+                                <a href="${job.job_url}" target="_blank">View Job Details</a>
+                            `;
+                            jobList.appendChild(listItem);
+                        });
+                    } else {
+                        jobList.innerHTML = `<li class="error">No jobs found for this tech stack and location.</li>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loadingMessage.style.display = 'none'; 
+                    jobList.innerHTML = `<li class="error">An error occurred while fetching jobs.</li>`;
+                });
+        }
+    </script>
+</body>
+</html>
