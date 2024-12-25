@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import requests
 import logging
-from flask_cors import CORS  
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
@@ -20,9 +20,9 @@ def getjobsbytechstack(techstack, location):
     queryparams = {'search_term': techstack, 'location': location, 'results_wanted': '10'}
     try:
         response = requests.post(url, headers=headers, json=queryparams)
-        response.raise_for_status() 
-        logging.debug("Response received: %s", response.json()) 
-        return response.json()  
+        response.raise_for_status()
+        logging.debug("Response received: %s", response.json())
+        return response.json()
     except requests.exceptions.RequestException as e:
         logging.error("Request failed: %s", e)
         return {"error": f"Failed to fetch data from the job API: {e}"}
@@ -37,5 +37,5 @@ def getjobs():
     else:
         return jsonify({"error": "Please provide both tech stack and location."})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+def handler(request, *args, **kwargs):
+    return app(*args, **kwargs)
