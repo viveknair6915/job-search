@@ -18,6 +18,7 @@ def getjobsbytechstack(techstack, location):
         'X-RapidAPI-Key': apikey
     }
     queryparams = {'search_term': techstack, 'location': location, 'results_wanted': '10'}
+    
     try:
         response = requests.post(url, headers=headers, json=queryparams)
         response.raise_for_status()
@@ -29,13 +30,21 @@ def getjobsbytechstack(techstack, location):
 
 @app.route('/jobs', methods=['GET'])
 def getjobs():
-    techstack = request.args.get('tech_stack', '')
-    location = request.args.get('location', '')
-    if techstack and location:
-        jobs = getjobsbytechstack(techstack, location)
-        return jsonify(jobs)
+    techstack = request.args.get('tech_stack', '').strip()
+    location = request.args.get('location', '').strip()
+    
+    if not techstack or not location:
+        return jsonify({"error": "Please provide both tech stack and location."}), 400
+    
+    jobs = getjobsbytechstack(techstack, location)
+    
+    if 'error' in jobs:
+        return jsonify(jobs), 500
+    
+    if 'jobs' in jobs and jobs['jobs']:
+        return jsonify(jobs), 200
     else:
-        return jsonify({"error": "Please provide both tech stack and location."})
+        return jsonify({"message": "No jobs found for the given criteria."}), 404
 
-def handler(request, *args, **kwargs):
-    return app(*args, **kwargs)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001, debug=True)
