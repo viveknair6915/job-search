@@ -28,6 +28,10 @@ def getjobsbytechstack(techstack, location):
         logging.error("Request failed: %s", e)
         return {"error": f"Failed to fetch data from the job API: {e}"}
 
+@app.route('/')
+def home():
+    return jsonify({"message": "Welcome to the Job Search API. Use the /jobs endpoint to search for jobs."})
+
 @app.route('/jobs', methods=['GET'])
 def getjobs():
     techstack = request.args.get('tech_stack', '').strip()
